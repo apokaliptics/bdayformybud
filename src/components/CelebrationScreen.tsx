@@ -7,7 +7,6 @@ interface CelebrationScreenProps {
 
 export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
   const [showFireworks, setShowFireworks] = useState(true);
-  const [musicEnabled, setMusicEnabled] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
@@ -22,8 +21,10 @@ export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
         // Set to start at 2:18 (138 seconds)
         audioRef.current.currentTime = 138;
         try {
+          // Ensure audio is unmuted and at a reasonable volume, then play
+          audioRef.current.muted = false;
+          audioRef.current.volume = 0.9;
           await audioRef.current.play();
-          setMusicEnabled(true);
         } catch (err) {
           console.log('Auto-play prevented, user interaction required');
         }
@@ -35,17 +36,7 @@ export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
     return () => clearTimeout(timer);
   }, []);
 
-  const toggleMusic = () => {
-    if (audioRef.current) {
-      if (musicEnabled) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.currentTime = 138; // Reset to 2:18
-        audioRef.current.play();
-      }
-      setMusicEnabled(!musicEnabled);
-    }
-  };
+  // Speaker control removed — music is attempted on mount automatically.
 
   return (
     <motion.div
@@ -171,22 +162,7 @@ export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
             Open the gifts again 🎁
           </motion.button>
 
-          <motion.button
-            className={`w-14 h-14 rounded-full shadow-lg transition-all ${
-              musicEnabled
-                ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white'
-                : 'bg-white text-[#5D3A5E]'
-            }`}
-            style={{ fontSize: '24px' }}
-            onClick={toggleMusic}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1 }}
-          >
-            {musicEnabled ? '🔊' : '🔇'}
-          </motion.button>
+
         </div>
       </motion.div>
 
