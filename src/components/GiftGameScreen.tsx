@@ -27,14 +27,14 @@ const gifts = [
 ];
 
 export function GiftGameScreen({ onNext }: GiftGameScreenProps) {
-  const [revealed, setRevealed] = useState<number[]>([]);
+  const [revealed, setRevealed] = useState<number | null>(null);
 
   const handleGiftClick = (id: number) => {
-    if (revealed.includes(id)) return;
-    setRevealed([...revealed, id]);
+    if (revealed !== null) return; // Can only reveal one
+    setRevealed(id);
   };
 
-  const allRevealed = revealed.length === gifts.length;
+  const oneRevealed = revealed !== null;
 
   return (
     <motion.div
@@ -55,7 +55,7 @@ export function GiftGameScreen({ onNext }: GiftGameScreenProps) {
 
       <div className="flex justify-center gap-8 mb-16 max-w-5xl flex-wrap">
         {gifts.map((gift, index) => {
-          const isRevealed = revealed.includes(gift.id);
+          const isRevealed = revealed === gift.id;
           
           return (
             <motion.div
@@ -66,10 +66,12 @@ export function GiftGameScreen({ onNext }: GiftGameScreenProps) {
               transition={{ delay: 0.3 + index * 0.15 }}
             >
               <motion.div
-                className={`w-64 h-72 ${gift.color} rounded-3xl shadow-2xl cursor-pointer flex items-center justify-center overflow-hidden`}
+                className={`w-64 h-72 ${gift.color} rounded-3xl shadow-2xl cursor-pointer flex items-center justify-center overflow-hidden ${
+                  revealed !== null && !isRevealed ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
                 onClick={() => handleGiftClick(gift.id)}
-                whileHover={!isRevealed ? { y: -8, scale: 1.02 } : {}}
-                whileTap={!isRevealed ? { scale: 0.98 } : {}}
+                whileHover={revealed === null ? { y: -8, scale: 1.02 } : {}}
+                whileTap={revealed === null ? { scale: 0.98 } : {}}
               >
                 {!isRevealed ? (
                   // Front of card - unopened gift
@@ -131,21 +133,36 @@ export function GiftGameScreen({ onNext }: GiftGameScreenProps) {
         })}
       </div>
 
-      {allRevealed && (
-        <motion.button
-          className="px-10 py-4 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-full shadow-xl"
-          style={{ fontSize: '20px', fontWeight: 600 }}
-          onClick={onNext}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Continue ✨
-        </motion.button>
+      {oneRevealed && (
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <motion.button
+            className="px-10 py-4 bg-gradient-to-r from-pink-400 to-purple-400 text-white rounded-full shadow-xl"
+            style={{ fontSize: '20px', fontWeight: 600 }}
+            onClick={onNext}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Continue ✨
+          </motion.button>
+
+          <motion.button
+            className="px-8 py-4 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-full shadow-lg"
+            style={{ fontSize: '18px', fontWeight: 600 }}
+            onClick={onNext}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Skip
+          </motion.button>
+        </div>
       )}
 
-      {!allRevealed && (
+      {!oneRevealed && (
         <motion.p
           className="text-center text-[#5D3A5E]"
           style={{ fontSize: '22px', fontWeight: 500 }}
@@ -153,7 +170,7 @@ export function GiftGameScreen({ onNext }: GiftGameScreenProps) {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8 }}
         >
-          Click on each gift to reveal your surprises!
+          Pick one gift to reveal your surprise!
         </motion.p>
       )}
     </motion.div>

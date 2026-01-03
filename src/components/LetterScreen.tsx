@@ -266,28 +266,28 @@ export function LetterScreen({ onNext }: LetterScreenProps) {
             className="leading-relaxed"
             style={{ fontSize: '20px', fontWeight: 400 }}
           >
-            Hope your birthday is as awesome as you are! 🎉
+            we've been friends for a quite a while lol, congratulations on your birthday. 🎉
           </p>
 
           <p 
             className="leading-relaxed"
             style={{ fontSize: '20px', fontWeight: 400 }}
           >
-            Here's to another year of great memories, fun times, and all the good stuff. You deserve all the cake, all the laughs, and maybe a few surprises too.
+            hopefully this year you'll receive everything you wish for, and well that's honestly it, idk what to say next.
           </p>
 
           <p 
             className="leading-relaxed"
             style={{ fontSize: '20px', fontWeight: 400 }}
           >
-            Chúc bạn một năm mới thật nhiều niềm vui, sức khỏe, và những điều tuyệt vời!
+            Chúc bro một năm mới thật nhiều niềm vui, sức khỏe, và good vibes i guess haha.
           </p>
 
           <div 
             className="text-right mt-10 pt-8 border-t-2 border-pink-200"
             style={{ fontSize: '20px', fontWeight: 500 }}
           >
-            <p>Cheers! 🎂</p>
+            <p>Kiet Minh (signed) 🎂</p>
           </div>
         </motion.div>
       </motion.div>

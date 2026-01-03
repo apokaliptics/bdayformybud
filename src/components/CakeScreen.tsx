@@ -7,17 +7,59 @@ interface CakeScreenProps {
 }
 
 export function CakeScreen({ onNext, showConfetti }: CakeScreenProps) {
-  const [candlesLit, setCandlesLit] = useState([true, true]);
+  const [candlesLit, setCandlesLit] = useState(Array(19).fill(true));
   const [clicked, setClicked] = useState(false);
+  const [hoveredCandle, setHoveredCandle] = useState<number | null>(null);
+  const [rotation, setRotation] = useState({ x: -10, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   const handleCakeClick = () => {
     if (clicked) return;
     setClicked(true);
 
-    // Extinguish candles one by one
-    setTimeout(() => setCandlesLit([false, true]), 200);
-    setTimeout(() => setCandlesLit([false, false]), 400);
-    setTimeout(() => onNext(), 2200);
+    // Extinguish candles one by one with a cool wave effect
+    const newCandlesLit = Array(19).fill(true);
+    for (let i = 0; i < 19; i++) {
+      setTimeout(() => {
+        newCandlesLit[i] = false;
+        setCandlesLit([...newCandlesLit]);
+      }, i * 100);
+    }
+    setTimeout(() => onNext(), 2500);
+  };
+
+  // Generate candle positions in a circle around the top of the cake
+  const getCandlePosition = (index: number) => {
+    const radius = 110;
+    const angle = (index / 19) * Math.PI * 2;
+    const x = Math.cos(angle) * radius;
+    const y = Math.sin(angle) * radius * 0.6; // Ellipse effect for perspective
+    return { x, y };
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (clicked) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || clicked) return;
+    
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    
+    setRotation({
+      x: rotation.x + deltaY * 0.3,
+      y: rotation.y + deltaX * 0.3,
+    });
+    
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   return (
@@ -71,115 +113,145 @@ export function CakeScreen({ onNext, showConfetti }: CakeScreenProps) {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        Chúc bạn một năm mới thật vui và nhẹ nhàng ✨
+        well, blow the candles lol ✨
       </motion.p>
 
-      {/* Realistic Birthday Cake - All centered */}
+      {/* 3D Birthday Cake with 19 Candles */}
       <motion.div
-        className="relative cursor-pointer flex flex-col items-center"
+        className="relative cursor-grab active:cursor-grabbing select-none"
         onClick={handleCakeClick}
-        whileHover={{ scale: clicked ? 1 : 1.03 }}
-        whileTap={{ scale: clicked ? 1 : 0.98 }}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        style={{ 
+          perspective: '1200px',
+          transformStyle: 'preserve-3d',
+        }}
       >
-        {/* Number "19" candles shaped like the numbers with candycane pattern */}
-        <div className="flex justify-center gap-3 mb-2">
-          {/* Number "1" shaped candle */}
-          <div className="relative flex flex-col items-center">
-            {/* Flame on "1" */}
-            <motion.div
-              className="text-xl mb-1"
-              animate={
-                candlesLit[0]
-                  ? {
-                      scale: [1, 1.15, 1],
-                      y: [0, -1, 0],
-                    }
-                  : {
-                      scale: 0,
-                      opacity: 0,
-                    }
-              }
-              transition={{
-                duration: 0.4,
-                repeat: candlesLit[0] ? Infinity : 0,
-              }}
-            >
-              🔥
-            </motion.div>
-            
-            {/* "1" shaped candle body with candycane stripes */}
-            <svg width="40" height="80" viewBox="0 0 40 80" className="drop-shadow-lg">
-              <defs>
-                <pattern id="candycane1" patternUnits="userSpaceOnUse" width="16" height="16" patternTransform="rotate(45)">
-                  <rect width="8" height="16" fill="#EF4444"/>
-                  <rect x="8" width="8" height="16" fill="#FFFFFF"/>
-                </pattern>
-              </defs>
-              {/* Shape of number 1 */}
-              <rect x="14" y="0" width="12" height="75" rx="6" fill="url(#candycane1)" stroke="#DC2626" strokeWidth="2"/>
-              <rect x="8" y="0" width="14" height="15" rx="4" fill="url(#candycane1)" stroke="#DC2626" strokeWidth="2"/>
-              {/* Wick holder */}
-              <ellipse cx="20" cy="2" rx="8" ry="3" fill="#FBBF24"/>
-            </svg>
-          </div>
+        <motion.div
+          style={{
+            rotateX: rotation.x,
+            rotateY: rotation.y,
+            transformStyle: 'preserve-3d',
+          }}
+          transition={{ type: 'spring', stiffness: 50, damping: 15 }}
+        >
 
-          {/* Number "9" shaped candle */}
-          <div className="relative flex flex-col items-center">
-            {/* Flame on "9" */}
-            <motion.div
-              className="text-xl mb-1"
-              animate={
-                candlesLit[1]
-                  ? {
-                      scale: [1, 1.15, 1],
-                      y: [0, -1, 0],
-                    }
-                  : {
-                      scale: 0,
-                      opacity: 0,
-                    }
-              }
-              transition={{
-                duration: 0.4,
-                repeat: candlesLit[1] ? Infinity : 0,
-              }}
-            >
-              🔥
-            </motion.div>
-            
-            {/* "9" shaped candle body with candycane stripes */}
-            <svg width="45" height="80" viewBox="0 0 45 80" className="drop-shadow-lg">
-              <defs>
-                <pattern id="candycane9" patternUnits="userSpaceOnUse" width="16" height="16" patternTransform="rotate(45)">
-                  <rect width="8" height="16" fill="#EF4444"/>
-                  <rect x="8" width="8" height="16" fill="#FFFFFF"/>
-                </pattern>
-              </defs>
-              {/* Shape of number 9 - top loop */}
-              <ellipse cx="22" cy="20" rx="18" ry="18" fill="url(#candycane9)" stroke="#DC2626" strokeWidth="2"/>
-              <ellipse cx="22" cy="20" rx="10" ry="10" fill="#FEF3C7"/>
-              {/* Bottom curved tail */}
-              <path d="M 32 20 Q 35 35, 32 50 Q 28 65, 18 72 Q 12 75, 8 72" 
-                    fill="none" 
-                    stroke="url(#candycane9)" 
-                    strokeWidth="14" 
-                    strokeLinecap="round"/>
-              <path d="M 32 20 Q 35 35, 32 50 Q 28 65, 18 72 Q 12 75, 8 72" 
-                    fill="none" 
-                    stroke="#DC2626" 
-                    strokeWidth="16" 
-                    strokeLinecap="round"
-                    opacity="0.3"/>
-              {/* Wick holder */}
-              <ellipse cx="22" cy="2" rx="8" ry="3" fill="#FBBF24"/>
-            </svg>
-          </div>
+        {/* Candles - 19 arranged in a circle */}
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-80 h-40">
+          {[...Array(19)].map((_, index) => {
+            const { x, y } = getCandlePosition(index);
+            const isLit = candlesLit[index];
+
+            return (
+              <div
+                key={index}
+                className="absolute w-4 h-16 cursor-pointer group"
+                style={{
+                  left: `calc(50% + ${x}px)`,
+                  top: `calc(50% + ${y}px)`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+                onMouseEnter={() => !clicked && setHoveredCandle(index)}
+                onMouseLeave={() => setHoveredCandle(null)}
+              >
+                {/* Flame */}
+                <motion.div
+                  className="absolute top-0 left-1/2 transform -translate-x-1/2 text-lg"
+                  animate={
+                    isLit
+                      ? {
+                          scale: [0.8, 1.2, 0.9],
+                          y: [-2, -6, -2],
+                          opacity: [0.8, 1, 0.8],
+                        }
+                      : {
+                          scale: 0,
+                          opacity: 0,
+                        }
+                  }
+                  transition={{
+                    duration: 0.6,
+                    repeat: isLit ? Infinity : 0,
+                    ease: 'easeInOut',
+                  }}
+                >
+                  🔥
+                </motion.div>
+
+                {/* Candle stick with gradient */}
+                <motion.div
+                  className="w-full h-full rounded-full shadow-lg"
+                  style={{
+                    background: 'linear-gradient(90deg, #FF6B9D 0%, #FF8FB3 50%, #FF6B9D 100%)',
+                    filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
+                  }}
+                  animate={
+                    hoveredCandle === index && !clicked
+                      ? {
+                          scale: 1.15,
+                          boxShadow: [
+                            '0 0 8px rgba(255, 107, 157, 0.5)',
+                            '0 0 16px rgba(255, 107, 157, 0.8)',
+                            '0 0 8px rgba(255, 107, 157, 0.5)',
+                          ],
+                        }
+                      : {
+                          scale: 1,
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                        }
+                  }
+                  transition={{ duration: 0.3 }}
+                >
+                  {/* Stripes on candle */}
+                  <div className="w-full h-full relative overflow-hidden rounded-full">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30" />
+                  </div>
+                </motion.div>
+
+                {/* Glow effect when lit */}
+                {isLit && (
+                  <motion.div
+                    className="absolute inset-0 rounded-full"
+                    style={{
+                      boxShadow: '0 0 12px rgba(255, 107, 157, 0.6)',
+                    }}
+                    animate={{
+                      boxShadow: [
+                        '0 0 12px rgba(255, 107, 157, 0.4)',
+                        '0 0 20px rgba(255, 107, 157, 0.8)',
+                        '0 0 12px rgba(255, 107, 157, 0.4)',
+                      ],
+                    }}
+                    transition={{
+                      duration: 0.6,
+                      repeat: Infinity,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
-
-        {/* Cake - 3 layers, perfectly centered */}
-        <div className="flex flex-col items-center gap-1">
-          {/* Top layer - frosting detail */}
-          <div className="relative w-72 h-20 bg-gradient-to-b from-pink-300 to-pink-400 rounded-2xl shadow-xl overflow-hidden">
+        {/* 3D Cake - 3 layers, perfectly centered */}
+        <motion.div
+          className="flex flex-col items-center gap-1 mt-32"
+          animate={clicked ? { scale: 0.95 } : { scale: 1 }}
+          transition={{ duration: 0.3 }}
+          whileHover={!clicked ? { scale: 1.05 } : {}}
+        >
+          {/* Top layer - frosting detail with 3D depth */}
+          <div 
+            className="relative w-72 h-20 overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #ec4899 0%, #db2777 50%, #be185d 100%)',
+              borderRadius: '1rem',
+              boxShadow: '0 20px 25px -5px rgba(219, 39, 119, 0.3), inset 0 1px 0 0 rgba(255,255,255,0.2)',
+              transform: 'translateZ(20px)',
+            }}
+          >
             {/* Cream dollops on top */}
             <div className="absolute -top-2 left-0 right-0 flex justify-around px-4">
               {[...Array(7)].map((_, i) => (
@@ -208,8 +280,16 @@ export function CakeScreen({ onNext, showConfetti }: CakeScreenProps) {
             </div>
           </div>
 
-          {/* Middle layer - chocolate */}
-          <div className="relative w-80 h-24 bg-gradient-to-b from-purple-400 to-purple-500 rounded-2xl shadow-xl">
+          {/* Middle layer - chocolate with 3D depth */}
+          <div 
+            className="relative w-80 h-24 overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #a855f7 0%, #9333ea 50%, #7e22ce 100%)',
+              borderRadius: '1rem',
+              boxShadow: '0 25px 30px -10px rgba(147, 51, 234, 0.35), inset 0 1px 0 0 rgba(255,255,255,0.15), inset 0 -2px 4px rgba(0,0,0,0.1)',
+              transform: 'translateZ(10px)',
+            }}
+          >
             {/* Frosting waves */}
             <div className="absolute top-0 left-0 right-0 h-3 bg-white/20 rounded-t-2xl" />
             
@@ -224,8 +304,16 @@ export function CakeScreen({ onNext, showConfetti }: CakeScreenProps) {
             </div>
           </div>
 
-          {/* Bottom layer - vanilla base */}
-          <div className="relative w-[360px] h-28 bg-gradient-to-b from-yellow-200 via-yellow-300 to-yellow-400 rounded-3xl shadow-2xl">
+          {/* Bottom layer - vanilla base with 3D depth */}
+          <div 
+            className="relative w-[360px] h-28 overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #fef08a 0%, #fcd34d 50%, #fbbf24 100%)',
+              borderRadius: '1.5rem',
+              boxShadow: '0 30px 40px -15px rgba(251, 191, 36, 0.4), inset 0 1px 0 0 rgba(255,255,255,0.3), inset 0 -4px 8px rgba(0,0,0,0.1)',
+              transform: 'translateZ(0px)',
+            }}
+          >
             {/* Frosting drip effect */}
             <div className="absolute top-0 left-0 right-0 overflow-hidden">
               <div className="flex justify-around">
@@ -244,11 +332,11 @@ export function CakeScreen({ onNext, showConfetti }: CakeScreenProps) {
 
           {/* Cake plate */}
           <div className="w-[400px] h-4 bg-gradient-to-b from-gray-200 to-gray-300 rounded-full shadow-lg" />
-        </div>
+        </motion.div>
 
-        {/* Sparkles when clicked - reduced */}
+        {/* Sparkles and confetti when clicked */}
         {clicked &&
-          [...Array(5)].map((_, i) => (
+          [...Array(8)].map((_, i) => (
             <motion.div
               key={i}
               className="absolute text-2xl"
@@ -260,14 +348,15 @@ export function CakeScreen({ onNext, showConfetti }: CakeScreenProps) {
               animate={{
                 scale: 1.5,
                 opacity: 0,
-                x: Math.cos((i * Math.PI * 2) / 5) * 120,
-                y: Math.sin((i * Math.PI * 2) / 5) * 120,
+                x: Math.cos((i * Math.PI * 2) / 8) * 150,
+                y: Math.sin((i * Math.PI * 2) / 8) * 150,
               }}
-              transition={{ duration: 1 }}
+              transition={{ duration: 1.2 }}
             >
               ✨
             </motion.div>
           ))}
+        </motion.div>
       </motion.div>
 
       {!clicked && (

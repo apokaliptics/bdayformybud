@@ -130,7 +130,7 @@ export function EnvelopeScreen({ onNext }: EnvelopeScreenProps) {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.4 }}
       >
-        Click to open 🎉
+        open it!!! (click on it) 🎉
       </motion.p>
     </motion.div>
   );

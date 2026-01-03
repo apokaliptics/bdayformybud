@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 interface CelebrationScreenProps {
   onRestart: () => void;
@@ -8,11 +8,44 @@ interface CelebrationScreenProps {
 export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
   const [showFireworks, setShowFireworks] = useState(true);
   const [musicEnabled, setMusicEnabled] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowFireworks(false), 4000);
     return () => clearTimeout(timer);
   }, []);
+
+  // Auto-play music when component mounts
+  useEffect(() => {
+    const playMusic = async () => {
+      if (audioRef.current) {
+        // Set to start at 2:18 (138 seconds)
+        audioRef.current.currentTime = 138;
+        try {
+          await audioRef.current.play();
+          setMusicEnabled(true);
+        } catch (err) {
+          console.log('Auto-play prevented, user interaction required');
+        }
+      }
+    };
+
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(playMusic, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (musicEnabled) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.currentTime = 138; // Reset to 2:18
+        audioRef.current.play();
+      }
+      setMusicEnabled(!musicEnabled);
+    }
+  };
 
   return (
     <motion.div
@@ -95,7 +128,7 @@ export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
             ease: 'easeInOut',
           }}
         >
-          Happy Birthday, Thư! 🎂
+          happy birthday bro 🎂
         </motion.h1>
 
         <motion.p
@@ -105,7 +138,7 @@ export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.6 }}
         >
-          Chúc bạn luôn vui vẻ và gặp nhiều điều tốt đẹp.
+          het roiiiiiiii
         </motion.p>
 
         {/* Single decorative cake - centered, large */}
@@ -145,7 +178,7 @@ export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
                 : 'bg-white text-[#5D3A5E]'
             }`}
             style={{ fontSize: '24px' }}
-            onClick={() => setMusicEnabled(!musicEnabled)}
+            onClick={toggleMusic}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             initial={{ opacity: 0, y: 20 }}
@@ -156,6 +189,14 @@ export function CelebrationScreen({ onRestart }: CelebrationScreenProps) {
           </motion.button>
         </div>
       </motion.div>
+
+      {/* Hidden audio element */}
+      <audio
+        ref={audioRef}
+        src="/birthday-song.mp3"
+        loop
+        preload="metadata"
+      />
 
       {/* Minimal bottom decoration - only 2 stars */}
       <motion.div
